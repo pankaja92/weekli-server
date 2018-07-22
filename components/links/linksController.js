@@ -11,9 +11,8 @@ const insertInto = async ({ title, description, image, url }, userid) => {
   const values = [userid, url, title, description, image, time];
   try {
     const data = await client.query(insertQuety, values);
-    return data.rows[0];
+    return links = data.rows[0];
   } catch (err) {
-    console.log(err.stack);
     return err;
   } finally {
     client.end();
@@ -32,7 +31,7 @@ const addLink = (req, res) => {
         language: false
       }
     },
-    (err, meta) => {
+    async (err, meta) => {
       try {
         if (meta) {
           metadata.title = meta.title;
@@ -40,11 +39,11 @@ const addLink = (req, res) => {
           metadata.image = meta.image;
           metadata.url = url;
         }
-        console.log(metadata);
-        res.send(metadata);
-        insertInto(metadata, userid);
+        const inserted = await insertInto(metadata, userid);
+        const newObj = await { userid , ...inserted };
+        await res.status(200).json(newObj);
       } catch (error) {
-        console.log(error);
+        res.status(400).json(error);
       }
     }
   );
@@ -53,7 +52,6 @@ const addLink = (req, res) => {
 const updateLink = async (req, res) => {
   const client = new Client(conString);
   await client.connect();
-  console.log(req.body);
   if (req.body) {
     const { linkid, userid } = req.body;
     const updateQuery =
@@ -101,11 +99,9 @@ const getLastWeek = async (req, res) => {
     const values = [userid];
     try {
       const data = await client.query(getQuery, values);
-      console.log(data.rows);
-      res.send(data.rows);
+      res.status(200).json(data.rows);
     } catch (err) {
-      console.log(err);
-      res.send("Error occured");
+      res.status(400).send(err);
     }
   }
 };

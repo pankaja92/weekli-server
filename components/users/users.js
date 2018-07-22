@@ -1,7 +1,9 @@
-const { registration, update } = require("./userController");
+const { registration, update, login } = require("./userController");
 
 module.exports = router => {
   router.post("/register", registration);
 
-  router.get("/login", update);
+  router.post("/update", update);
+
+  router.get("/login", login);
 };
